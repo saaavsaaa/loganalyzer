@@ -187,6 +187,18 @@ class LogStreamConfigDisk extends LogStreamConfig {
 		//echo "dir : " . $dir . "<br>";
 		$this->FileName = $dir .$sortVal . ".log";
 	}
+	
+	public function GetGrepResults($key, $beginLine, $endLine){
+		$dir = $this->GetCurrentDir();
+		$grep = "/bin/grep '". $key ."' "  . $dir . "*.*  | sed -n '" . $beginLine . "," . $endLine . "p'";
+		//print_r($grep . "<br>");
+		$results = shell_exec($grep);
+		//$results = `/bin/cat /var/log/error/*.log | /bin/grep error | head -10`;
+		//$results = `wc -w *.*`;
+		/*$c = '/bin/cat /var/log/error/*.log| /bin/grep error';
+		exec($c, $results, $code);*/
+		return $results;
+	}
 
 	private function GetCurrentDir(){
 		if(!empty($this->CurrentDir)){
@@ -221,14 +233,14 @@ class LogStreamConfigDisk extends LogStreamConfig {
 	}
 
 	private function BuildDisplayContent($dir, $sortVal){
-		$show = $this->SetCurrentColor("Current Dir : " . $dir);
-		$show = $show . $this->SetCurrentColor("Current Log : " . $sortVal);
+		$show = $this->SetCurrentColor("Current Dir : " . $dir) . "</br>";
+		$show = $show . $this->SetCurrentColor("Current Log : " . $sortVal) . "</br>";
 		$show = $show . $this->GetLogList($dir);
 		return $show;
 	}
 
-	private function SetCurrentColor( $text ){
-		return "<font color='#4169e1' style='font-weight: bold'>" . $text . "</font></br>";
+	private function SetCurrentColor($text, $color = "#4169e1"){
+		return "<font color='" . $color . "' style='font-weight: bold'>" . $text . "</font>";
 	}
 
 	private function GetLogList($dir){

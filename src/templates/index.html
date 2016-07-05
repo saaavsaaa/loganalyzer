@@ -23,7 +23,7 @@
 <!-- ENDIF EnablePredefinedSearches="true" -->
 	<td align="center" nowrap valign="top">
 	<td nowrap align="center" nowrap valign="top">
-		<input maxlength="2048" name="filter" size="80" title="Search" value="{searchstr_htmlform}" class="ui-widget-content SearchFormTextbox" onkeypress="MoveToButtonOnKeypress('buttonsearch', event);">
+		<input id="query_key" maxlength="2048" name="filter" size="80" title="Search" value="{searchstr_htmlform}" class="ui-widget-content SearchFormTextbox" onkeypress="MoveToButtonOnKeypress('buttonsearch', event);">
 		</br>
 		<button id="buttonsearch"><img src="{IMG_SPACER}" align="left" class="ui-icon ui-icon-search" title="{LN_SEARCH}">&nbsp;{LN_SEARCH}</button>
 <!-- IF enabledoraclesearchstr="true" -->
@@ -32,8 +32,18 @@
 		<button id="buttonlucky"><img src="{IMG_SPACER}" align="left" class="ui-icon ui-icon-star" title="{SearchCustomButtonCaption}">&nbsp;{SearchCustomButtonCaption}</span></button>
 		<button id="buttonreset"><img src="{IMG_SPACER}" align="left" class="ui-icon ui-icon-power" title="{LN_SEARCH_RESET}">&nbsp;{LN_SEARCH_RESET}</span></button>
 		<button id="buttonhighlight"><span class="ui-button-text">{LN_HIGHLIGHT}</span></button>
+
+	    <button id="buttonslowly"><img src="{IMG_SPACER}" align="left" class="ui-icon ui-icon-star" title="slowquery">&nbsp;Query All Date</span></button>
 		<script> 
 			CreateLinkFunction( "#buttonlucky", "?search={LN_SEARCH}&filter={SearchCustomButtonSearch}{additional_url_sourceonly}");
+
+			$("#buttonslowly").button()
+					.click(function() {
+						var key = $("#query_key").val();
+						window.location.href = "slowsearch.php?queryKey=" + key;
+						return false;
+					});
+
 			// Custom Buttons
 			$("#buttonsearch").button()
 			.click(function() {
