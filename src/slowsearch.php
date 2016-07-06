@@ -19,14 +19,7 @@ InitPhpLogCon();
 InitSourceConfigs();
 
 $queryKey = $_GET['queryKey'];
-$beginLine = 1;
-$endLine = 10;
-if ( isset($_GET['begin']) && !empty($_GET['begin']) ){
-    $beginLine = $_GET['begin'];
-}
-if ( isset($_GET['end']) && !empty($_GET['end']) ){
-    $endLine = $_GET['end'];
-}
+
 global $content, $currentSourceID;
 $stream_config = $content['Sources'][$currentSourceID]['ObjRef'];
 
@@ -35,10 +28,21 @@ if ( isset($_GET['logs']) && !empty($_GET['logs']) ){
     //echo $_GET['logs'] . "<br>";
     //$logs = str_replace("{blank_space}", " ", $_GET['logs']);
     $logs = $_GET['logs'];
+    $logs = str_replace("{blank_space}", " ", $logs);
 } else {
     $logs = "*.*";
 }
+$count = $stream_config->GetRowCounts($queryKey, $logs);
+echo "RowCounts : " . $count . "<br>";
 
+$beginLine = 1;
+$endLine = 10;
+if ( isset($_GET['begin']) && !empty($_GET['begin']) ){
+    $beginLine = $_GET['begin'];
+}
+if ( isset($_GET['end']) && !empty($_GET['end']) ){
+    $endLine = $_GET['end'];
+}
 $pageSize = $endLine - $beginLine + 1;
 
 $nextBegin = $endLine + 1;
@@ -51,17 +55,12 @@ if ($beginLine > $pageSize){
 }
 $preEnd = $preBegin + $pageSize - 1;
 
-$count = $stream_config->GetRowCounts($queryKey, $logs);
-echo "RowCounts : " . $count . "<br>";
-
 $pattern = "slowsearch.php?queryKey=%s&begin=%d&end=%d";
 $startUrl = sprintf($pattern, $queryKey, 1, $pageSize);//$pageUrl . "queryKey=" . $queryKey . "&begin=1&end=" . $beginLine + $pageSize - 1;
 $preUrl = sprintf($pattern, $queryKey, $preBegin, $preEnd);//$pageUrl . "queryKey=" . $queryKey . "&begin=" . $preBegin . "&end=" . $preEnd;
 $nextUrl = sprintf($pattern, $queryKey, $nextBegin, $nextEnd);//$pageUrl . "queryKey=" . $queryKey . "&begin=" . $nextBegin . "&end=" . $nextEnd;
 $lastUrl = sprintf($pattern, $queryKey, $count - $pageSize + 1, $count);//$pageUrl . "queryKey=" . $queryKey . "&begin=" . $count - $pageSize + 1 . "&end=" . $count;
-
 if ( !empty( $logs ) && $logs != "*.*"){
-    $logs = str_replace("{blank_space}", " ", $logs);
     $preUrl .= "&logs=" . $logs;
     $nextUrl .= "&logs=" . $logs;
     $startUrl .= "&logs=" . $logs;
