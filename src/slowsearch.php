@@ -30,15 +30,57 @@ if ( isset($_GET['end']) && !empty($_GET['end']) ){
 global $content, $currentSourceID;
 $stream_config = $content['Sources'][$currentSourceID]['ObjRef'];
 
-$nextBegin = $endLine + 1;
-$nextEnd = $nextBegin + ($endLine - $beginLine);
-$url = "slowsearch.php?queryKey=" . $queryKey . "&begin=" . $nextBegin . "&end=" . $nextEnd;
-echo "<center><br><br><a href='" . $url . "'><font style='font-weight: bold'>下一页</font></a><br><br></center>";
+echo "&logs=20160705.log{blank_space}20160706.log<br>";
+if ( isset($_GET['logs']) && !empty($_GET['logs']) ){
+    //echo $_GET['logs'] . "<br>";
+    //$logs = str_replace("{blank_space}", " ", $_GET['logs']);
+    $logs = $_GET['logs'];
+} else {
+    $logs = "*.*";
+}
 
-$results = $stream_config->GetGrepResults($queryKey, $beginLine, $endLine);
+$pageSize = $endLine - $beginLine + 1;
+
+$nextBegin = $endLine + 1;
+$nextEnd = $nextBegin + $pageSize - 1;
+
+if ($beginLine > $pageSize){
+    $preBegin = $beginLine - $pageSize;
+} else {
+    $preBegin = 1;
+}
+$preEnd = $preBegin + $pageSize - 1;
+
+$count = $stream_config->GetRowCounts($queryKey, $logs);
+echo "RowCounts : " . $count . "<br>";
+
+$pattern = "slowsearch.php?queryKey=%s&begin=%d&end=%d";
+$startUrl = sprintf($pattern, $queryKey, 1, $pageSize);//$pageUrl . "queryKey=" . $queryKey . "&begin=1&end=" . $beginLine + $pageSize - 1;
+$preUrl = sprintf($pattern, $queryKey, $preBegin, $preEnd);//$pageUrl . "queryKey=" . $queryKey . "&begin=" . $preBegin . "&end=" . $preEnd;
+$nextUrl = sprintf($pattern, $queryKey, $nextBegin, $nextEnd);//$pageUrl . "queryKey=" . $queryKey . "&begin=" . $nextBegin . "&end=" . $nextEnd;
+$lastUrl = sprintf($pattern, $queryKey, $count - $pageSize + 1, $count);//$pageUrl . "queryKey=" . $queryKey . "&begin=" . $count - $pageSize + 1 . "&end=" . $count;
+
+if ( !empty( $logs ) && $logs != "*.*"){
+    $logs = str_replace("{blank_space}", " ", $logs);
+    $preUrl .= "&logs=" . $logs;
+    $nextUrl .= "&logs=" . $logs;
+    $startUrl .= "&logs=" . $logs;
+    $lastUrl .= "&logs=" . $logs;
+}
+
+$pageButtons = "<center><br><br>";
+$pageButtons .= "<a href='" . $startUrl . "'><font style='font-weight: bold'>首页</font></a>&nbsp;&nbsp;&nbsp;";
+$pageButtons .= "<a href='" . $preUrl . "'><font style='font-weight: bold'>上一页</font></a>&nbsp;&nbsp;&nbsp;";
+$pageButtons .= "<a href='" . $nextUrl . "'><font style='font-weight: bold'>下一页</font></a>&nbsp;&nbsp;&nbsp;";
+$pageButtons .= "<a href='" . $lastUrl . "'><font style='font-weight: bold'>尾页</font></a>";
+$pageButtons .= "<br><br></center>";
+echo $pageButtons;
+
+$results = $stream_config->GetGrepResults($queryKey, $beginLine, $endLine, $logs);
 
 if ( empty($results) ){
     echo "nothing to view<br>";
+    echo "<center><br><br><a href='index.php'><font style='font-weight: bold'>返回</font></a></center>";
     return;
 }
 $show = str_replace($queryKey, SetCurrentColor($queryKey, "red"), $results);

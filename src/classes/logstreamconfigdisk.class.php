@@ -187,16 +187,38 @@ class LogStreamConfigDisk extends LogStreamConfig {
 		//echo "dir : " . $dir . "<br>";
 		$this->FileName = $dir .$sortVal . ".log";
 	}
-	
-	public function GetGrepResults($key, $beginLine, $endLine){
+
+	/*public function GetGrepResults($key, $beginLine, $endLine){
 		$dir = $this->GetCurrentDir();
 		$grep = "/bin/grep '". $key ."' "  . $dir . "*.*  | sed -n '" . $beginLine . "," . $endLine . "p'";
-		//print_r($grep . "<br>");
+		print_r($grep . "<br>");
 		$results = shell_exec($grep);
 		//$results = `/bin/cat /var/log/error/*.log | /bin/grep error | head -10`;
 		//$results = `wc -w *.*`;
-		/*$c = '/bin/cat /var/log/error/*.log| /bin/grep error';
-		exec($c, $results, $code);*/
+		//$c = '/bin/cat /var/log/error/*.log| /bin/grep error';
+		//exec($c, $results, $code);
+		return $results;
+	}*/
+
+	public function GetGrepResults($key, $beginLine, $endLine, $path = "*.*"){
+		$dir = $this->GetCurrentDir();
+		$grep = "cd " . $dir;
+		$grep .= ";/bin/grep '". $key ."' " . $path . "  | sed -n '" . $beginLine . "," . $endLine . "p'";
+		echo($grep . "<br>");
+		$results = shell_exec($grep);
+		//$results = `/bin/cat /var/log/error/*.log | /bin/grep error | head -10`;
+		//$results = `wc -w *.*`;
+		//$c = '/bin/cat /var/log/error/*.log| /bin/grep error';
+		//exec($c, $results, $code);
+		return $results;
+	}
+
+	public function GetRowCounts($key, $path = "*.*"){
+		$dir = $this->GetCurrentDir();
+		$grep = "cd " . $dir;
+		$grep .= ";/bin/grep '". $key ."' " . $path . "  | wc -l";
+		echo($grep . "<br>");
+		$results = shell_exec($grep);
 		return $results;
 	}
 
